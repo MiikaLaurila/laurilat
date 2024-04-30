@@ -9,10 +9,20 @@ export const NewUserValidator = object({
   admin: boolean().required(),
 });
 
+export type NewUser = ReturnType<typeof NewUserValidator.validateSync>;
+
 export const LoginUserValidator = object({
   username: string().required(),
   password: string().required(),
 });
+
+export type LoginUser = ReturnType<typeof LoginUserValidator.validateSync>;
+
+export const DeleteUserValidator = object({
+  username: string().required(),
+});
+
+export type DeleteUser = ReturnType<typeof DeleteUserValidator.validateSync>;
 
 export const UserSchema = new Schema({
   username: { type: String, required: true, trim: true, unique: true },
