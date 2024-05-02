@@ -11,6 +11,7 @@
     "@types/express": "^4.17.21",
     "@types/express-session": "^1.18.0",
     "@types/mongodb": "^4.0.7",
+    "@types/multer": "^1.4.11",
     "@types/node": "^20.12.7",
     "@typescript-eslint/eslint-plugin": "^7.7.1",
     "@typescript-eslint/parser": "^7.7.1",
@@ -25,14 +26,23 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/minio": "^7.1.1",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "connect-mongo": "^5.1.0",
+    "cors": "^2.8.5",
     "express": "^4.19.2",
     "express-session": "^1.18.0",
+    "minio": "^8.0.0",
     "mongoose": "^8.3.2",
+    "multer": "^1.4.5-lts.1",
     "node-cache": "^5.1.2",
     "qs": "^6.12.1",
+    "rehype-parse": "^9.0.0",
+    "rehype-sanitize": "^6.0.0",
+    "rehype-stringify": "^10.0.0",
+    "unified": "^11.0.4",
     "yup": "^1.4.0"
   }
 }

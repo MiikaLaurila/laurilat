@@ -10,9 +10,20 @@ interface EnvKeys {
   DB_PASSWORD: string;
   NODE_ENV: EnvironmentType;
   COOKIE_NAME: string;
+  MINIO_USER: string;
+  MINIO_PASS: string;
 }
 
-const keys = ['SESSION_KEY', 'DB_URL', 'DB_USERNAME', 'DB_PASSWORD', 'NODE_ENV', 'COOKIE_NAME'] as const;
+const keys = [
+  'SESSION_KEY',
+  'DB_URL',
+  'DB_USERNAME',
+  'DB_PASSWORD',
+  'NODE_ENV',
+  'COOKIE_NAME',
+  'MINIO_USER',
+  'MINIO_PASS',
+] as const;
 
 export const environment: Readonly<EnvKeys> = (() => {
   const newEnvVars: EnvKeys = {
@@ -22,6 +33,8 @@ export const environment: Readonly<EnvKeys> = (() => {
     DB_PASSWORD: '',
     NODE_ENV: EnvironmentType.DEVELOPMENT,
     COOKIE_NAME: '',
+    MINIO_PASS: '',
+    MINIO_USER: '',
   };
   keys.forEach((key) => {
     const val = process.env[key];

@@ -7,6 +7,7 @@ export const NewUserValidator = object({
   email: string().email().required(),
   password: string().required().min(8, 'Password must be at least 8 characters'),
   admin: boolean().required(),
+  profileImage: string().default(''),
 });
 
 export type NewUser = ReturnType<typeof NewUserValidator.validateSync>;
@@ -38,7 +39,10 @@ export const UserSchema = new Schema({
   },
   password: { type: String, required: true },
   admin: { type: Boolean, required: true },
+  profileImage: { type: String, required: true },
 });
+
+Schema.Types.String.checkRequired((v) => v != null);
 
 export type User = InferSchemaType<typeof UserSchema>;
 

@@ -6,6 +6,9 @@ import session from 'express-session';
 import MongoStore from 'connect-mongo';
 import { environment } from './utils/env';
 import { MongoClient } from 'mongodb';
+import { unknownRoute } from './middleware/unknownRouteMiddleware';
+import { initializeMinio } from './minio/initializeMinio';
+import { runMigrations } from './utils/migrations';
 
 declare module 'express-session' {
   interface SessionData {
@@ -35,6 +38,7 @@ const addMiddleWare = (client: MongoClient) => {
     })
   );
   app.use('/api/v1', v1Router);
+  app.use(unknownRoute);
 };
 
 const server = app.listen(port, () => {
@@ -46,11 +50,14 @@ console.log(`Connecting to MongoDB in ${environment.DB_URL}`);
 connect(`mongodb://${environment.DB_USERNAME}:${environment.DB_PASSWORD}@${environment.DB_URL}`)
   .then((mongoose) => {
     console.log(`Mongoose connected to ${environment.DB_URL}`);
+    runMigrations();
     addMiddleWare(mongoose.connection.getClient());
   })
   .catch((err) => {
     console.error(err);
   });
+
+initializeMinio();
 
 for (const signal of ['SIGTERM', 'SIGINT'])
   process.on(signal, () => {
