@@ -5,7 +5,9 @@ export const cssColors = {
   menuClick: '#655446',
   menuHoverText: '#fce883',
   border: '#928a81',
-  darkBorder: '#746e68'
+  darkBorder: '#746e68',
+  whiteTransparent20: 'rgba(255,255,255,0.2)',
+  darkTransparent20: 'rgba(0,0,0,0.2)',
 } as const;
 
 export const cssWidths = {

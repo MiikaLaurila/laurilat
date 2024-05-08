@@ -58,7 +58,7 @@ export const LoginPage: React.FC = () => {
           <FormContainer>
             <TextInput title="Username" onInput={onUsernameInput} />
             <TextInput title="Password" hidden onInput={onPasswordInput} />
-            <Button onClick={onLoginClick}>Login</Button>
+            <Button width={13} onClick={onLoginClick}>Login</Button>
           </FormContainer>
           {errorMessage && <p>{errorMessage}</p>}
         </section>

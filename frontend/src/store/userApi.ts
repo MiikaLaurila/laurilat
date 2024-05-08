@@ -60,7 +60,7 @@ export const userApi = createApi({
       }),
     }),
 
-    uploadImage: builder.mutation<User, File>({
+    uploadProfileImage: builder.mutation<User, File>({
       query: (fileData) => {
         const formData = new FormData();
         formData.append('image', fileData);
@@ -75,7 +75,7 @@ export const userApi = createApi({
       transformResponse: userResponseTransformer,
     }),
 
-    deleteImage: builder.mutation<User, void>({
+    deleteProfileImage: builder.mutation<User, void>({
       query: () => ({
         url: '/image',
         method: 'DELETE',
@@ -87,13 +87,11 @@ export const userApi = createApi({
   }),
 });
 
-// Export hooks for usage in functional components, which are
-// auto-generated based on the defined endpoints
 export const {
   useLoginMutation,
   useLogoutMutation,
   useUserInfoQuery,
-  useUploadImageMutation,
-  useDeleteImageMutation,
+  useUploadProfileImageMutation,
+  useDeleteProfileImageMutation,
   useCreateUserMutation,
 } = userApi;

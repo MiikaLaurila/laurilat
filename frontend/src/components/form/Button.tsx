@@ -9,6 +9,9 @@ interface Props extends PropsWithChildren {
 
 const ButtonElement = styled('button')<{ width?: number }>((props) => ({
   width: props.width ? `${props.width}rem` : 'unset',
+  ':hover': {
+    cursor: 'pointer',
+  },
 }));
 
 export const Button: React.FC<Props> = (props: Props) => {

@@ -2,7 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './style/reset.css';
 import './style/index.css';
-import './style/markdown.css';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { ErrorPage } from './pages/ErrorPage';
 import { RootPage } from './pages/RootPage';

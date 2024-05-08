@@ -1,14 +1,14 @@
 import express from 'express';
 import 'dotenv/config';
 import { connect } from 'mongoose';
-import { v1Router } from './v1Router';
+import { v1Router } from './v1Router.js';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
-import { environment } from './utils/env';
+import { environment } from './utils/env.js';
 import { MongoClient } from 'mongodb';
-import { unknownRoute } from './middleware/unknownRouteMiddleware';
-import { initializeMinio } from './minio/initializeMinio';
-import { runMigrations } from './utils/migrations';
+import { unknownRoute } from './middleware/unknownRouteMiddleware.js';
+import { initializeMinio } from './minio/initializeMinio.js';
+import { runMigrations } from './utils/migrations.js';
 
 declare module 'express-session' {
   interface SessionData {

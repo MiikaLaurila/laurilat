@@ -1,4 +1,4 @@
-import { ServerResponse } from './models/ServerResponse';
+import { ServerResponse } from './models/ServerResponse.js';
 
 export const successRes = (message: string): ServerResponse => {
   return {

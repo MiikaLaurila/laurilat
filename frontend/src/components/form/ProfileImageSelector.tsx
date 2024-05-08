@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from './Button';
 import { User } from '../../types/User';
-import { useDeleteImageMutation, useUploadImageMutation } from '../../store/userApi';
+import { useDeleteProfileImageMutation, useUploadProfileImageMutation } from '../../store/userApi';
 import { FormContainer } from './FormContainer';
 import { ProfileImageContainer, ProfileImageElement } from '../common/ProfileImageContainer';
 
@@ -21,8 +21,8 @@ export const ProfileImageSelector: React.FC<Props> = (props: Props) => {
   const imageSelectionRef = useRef<HTMLInputElement>(null);
   const [hasImage, setHasImage] = useState(false);
   const [imageSelected, setImageSelected] = useState(false);
-  const [triggerUpload] = useUploadImageMutation();
-  const [triggerDelete] = useDeleteImageMutation();
+  const [triggerUpload] = useUploadProfileImageMutation();
+  const [triggerDelete] = useDeleteProfileImageMutation();
 
   useEffect(() => {
     if (imageRef.current) {

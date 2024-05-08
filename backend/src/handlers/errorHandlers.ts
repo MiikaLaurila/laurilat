@@ -1,8 +1,8 @@
 import { Response } from 'express';
 import { MongoError } from 'mongodb';
-import { Error } from 'mongoose';
-import { environment } from '../utils/env';
-import { errorRes } from '../common/serverResponse';
+import { Error as MongooseError } from 'mongoose';
+import { environment } from '../utils/env.js';
+import { errorRes } from '../common/serverResponse.js';
 import { InvalidObjectNameError } from 'minio';
 
 export const handleErrors = (error: unknown, res: Response) => {
@@ -10,7 +10,7 @@ export const handleErrors = (error: unknown, res: Response) => {
     console.error(error);
   }
 
-  if (error instanceof Error.ValidationError) {
+  if (error instanceof MongooseError.ValidationError) {
     const messages = Object.values(error.errors).map((err) => err.message);
     return res.status(400).json(errorRes('ValidationError', messages));
   } else if ((error as MongoError).code === 11000) {

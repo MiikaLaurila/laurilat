@@ -1,15 +1,22 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
-import { Editable, Post } from '../types/EditablePost';
+import { Editable, EditablePost, ModifiedEditablePost } from '../types/EditablePost';
+import { postApi } from './postApi';
 
 interface EditableState {
   editing: boolean;
   addingItem: boolean;
-  currentPost?: Post;
-  editedPost?: Post;
+  currentPost?: EditablePost;
+  editedPost?: ModifiedEditablePost;
   highlightedEditable?: Editable;
 }
 
 const initialState: EditableState = { editing: false, addingItem: false } as const;
+
+const swapElements = <T>(array: T[], idx1: number, idx2: number) => {
+  const temp = array[idx1];
+  array[idx1] = array[idx2];
+  array[idx2] = temp;
+};
 
 export const editableSlice = createSlice({
   name: 'editable',
@@ -30,13 +37,13 @@ export const editableSlice = createSlice({
         addingItem: action.payload,
       };
     },
-    setCurrentPost: (state, action: PayloadAction<Post>) => {
+    setCurrentPost: (state, action: PayloadAction<EditablePost>) => {
       return {
         ...state,
         currentPost: action.payload,
       };
     },
-    setEditedPost: (state, action: PayloadAction<Post>) => {
+    setEditedPost: (state, action: PayloadAction<ModifiedEditablePost>) => {
       return {
         ...state,
         editedPost: action.payload,
@@ -83,6 +90,63 @@ export const editableSlice = createSlice({
         },
       };
     },
+    moveEditableOfPost: (state, action: PayloadAction<{ editable: Editable; direction: 'up' | 'down' }>) => {
+      if (!state.editedPost) return state;
+      const newEditables = [...state.editedPost.content];
+      const currentEditableIndex = newEditables.findIndex((e) => e.id === action.payload.editable.id);
+      if (currentEditableIndex < 0) return state;
+      if (action.payload.direction === 'up' && currentEditableIndex > 0 && newEditables.length >= 2) {
+        swapElements(newEditables, currentEditableIndex, currentEditableIndex - 1);
+      } else if (
+        action.payload.direction === 'down' &&
+        currentEditableIndex <= newEditables.length - 2 &&
+        newEditables.length >= 2
+      ) {
+        swapElements(newEditables, currentEditableIndex, currentEditableIndex + 1);
+      }
+      return {
+        ...state,
+        editedPost: {
+          ...state.editedPost,
+          content: newEditables,
+        },
+      };
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addMatcher(postApi.endpoints.getPost.matchFulfilled, (state, query) => {
+        return {
+          ...state,
+          currentPost: query.payload,
+        };
+      })
+      .addMatcher(postApi.endpoints.getHomePost.matchFulfilled, (state, query) => {
+        return {
+          ...state,
+          currentPost: query.payload,
+        };
+      })
+      .addMatcher(postApi.endpoints.createPost.matchFulfilled, (state, query) => {
+        return {
+          ...state,
+          currentPost: query.payload,
+          highlightedEditable: undefined,
+          editedPost: undefined,
+          addingItem: false,
+          editing: false,
+        };
+      })
+      .addMatcher(postApi.endpoints.modifyPost.matchFulfilled, (state, query) => {
+        return {
+          ...state,
+          currentPost: query.payload,
+          highlightedEditable: undefined,
+          editedPost: undefined,
+          addingItem: false,
+          editing: false,
+        };
+      });
   },
 });
 
@@ -95,4 +159,5 @@ export const {
   addEditableToPost,
   modifyEditableOfPost,
   deleteEditableFromPost,
+  moveEditableOfPost,
 } = editableSlice.actions;

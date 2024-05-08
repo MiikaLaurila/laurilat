@@ -11,6 +11,10 @@ import {
 } from '../../store/editableSlice';
 import { EditableType, PostType } from '../../types/EditablePost';
 import { getInitialEditable, getInitialPost } from '../../library/editables';
+import deepEqual from 'deep-equal';
+import { useState } from 'react';
+import { ConfirmationModal } from '../common/ConfirmationModal';
+import { useCreatePostMutation, useModifyPostMutation } from '../../store/postApi';
 
 interface Props {
   postType: PostType;
@@ -52,6 +56,10 @@ export const EditControls: React.FC<Props> = (props: Props) => {
   const editState = useAppSelector((state) => state.editableStore);
   const userInfo = useAppSelector((state) => state.userStore.userInfo);
   const dispatch = useAppDispatch();
+  const [stopEditDialogOpen, setStopEditDialogOpen] = useState(false);
+  const [saveEditDialogOpen, setSaveEditDialogOpen] = useState(false);
+  const [createPostTrigger] = useCreatePostMutation();
+  const [modifyPostTrigger] = useModifyPostMutation();
 
   const getNonEditControls = () => {
     return (
@@ -99,28 +107,102 @@ export const EditControls: React.FC<Props> = (props: Props) => {
     );
   };
 
+  const isCurrentPostEdited = () => {
+    if (!editState.currentPost) {
+      if (editState.editedPost && editState.editedPost.content.length > 0) {
+        return true;
+      }
+      return false;
+    }
+    if (editState.editedPost) {
+      return !deepEqual(editState.currentPost.content, editState.editedPost.content);
+    }
+  };
+
+  const saveCurrentPost = () => {
+    if (editState.editedPost) {
+      if (editState.editedPost.id) {
+        modifyPostTrigger({
+          content: editState.editedPost.content,
+          author: editState.editedPost.author,
+          type: editState.editedPost.type,
+          draft: false,
+          id: editState.editedPost.id,
+        }).then(() => {
+          setSaveEditDialogOpen(false);
+        });
+      } else {
+        createPostTrigger({
+          content: editState.editedPost.content,
+          author: editState.editedPost.author,
+          type: editState.editedPost.type,
+          draft: false,
+        }).then(() => {
+          setSaveEditDialogOpen(false);
+        });
+      }
+    }
+  };
+
   const getEditControls = () => {
     return (
-      <EditControlsEnabled>
-        <EditControlsButtonCluster>
-          <Button
-            onClick={() => {
-              dispatch(setEditing(!editState.editing));
-            }}
-          >
-            {'Stop Editing'}
-          </Button>
-          <Button>{'Save Modifications'}</Button>
-          <Button
-            onClick={() => {
-              dispatch(setAddingItem(!editState.addingItem));
-            }}
-          >
-            {'Add Content'}
-          </Button>
-        </EditControlsButtonCluster>
-        {editState.addingItem && getAddContentControls()}
-      </EditControlsEnabled>
+      <>
+        <EditControlsEnabled>
+          <EditControlsButtonCluster>
+            <Button
+              onClick={() => {
+                if (isCurrentPostEdited()) {
+                  setStopEditDialogOpen(true);
+                } else {
+                  dispatch(setEditing(!editState.editing));
+                }
+              }}
+            >
+              Stop Editing
+            </Button>
+            <Button
+              onClick={() => {
+                if (!isCurrentPostEdited()) {
+                  return;
+                } else {
+                  setSaveEditDialogOpen(true);
+                }
+              }}
+            >
+              {editState.editedPost?.id ? 'Save modifications' : 'Create new post'}
+            </Button>
+            <Button
+              onClick={() => {
+                dispatch(setAddingItem(!editState.addingItem));
+              }}
+            >
+              Add Content
+            </Button>
+          </EditControlsButtonCluster>
+          {editState.addingItem && getAddContentControls()}
+        </EditControlsEnabled>
+        <ConfirmationModal
+          title="Unsaved modificatons"
+          content="Are you sure you want to discard all edits made to current post?"
+          onCancel={() => {
+            setStopEditDialogOpen(false);
+          }}
+          onConfirm={() => {
+            setStopEditDialogOpen(false);
+            dispatch(setEditing(!editState.editing));
+          }}
+          open={stopEditDialogOpen}
+        />
+        <ConfirmationModal
+          title="Are you sure you want to save modifications"
+          content=""
+          onCancel={() => {
+            setSaveEditDialogOpen(false);
+          }}
+          onConfirm={saveCurrentPost}
+          open={saveEditDialogOpen}
+        />
+      </>
     );
   };
 

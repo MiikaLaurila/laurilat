@@ -1,7 +1,7 @@
 import { AnyObject, ObjectSchema } from 'yup';
 import { Request, Response, NextFunction, Locals } from 'express';
-import { errorRes } from '../common/serverResponse';
-import { ServerResponse as ServerResponseJson } from '../common/models/ServerResponse';
+import { errorRes } from '../common/serverResponse.js';
+import { ServerResponse as ServerResponseJson } from '../common/models/ServerResponse.js';
 import { ServerResponse } from 'http';
 
 export interface ValidatedResponse<T> extends Response<ServerResponseJson, Locals & { validatedData: T }> {

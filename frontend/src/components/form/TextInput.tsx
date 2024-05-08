@@ -21,7 +21,7 @@ export const TextInput: React.FC<Props> = (props: Props) => {
   return (
     <div>
       <Title>{props.title}</Title>
-      <Input type={props.hidden ? 'password' : undefined} onInput={props.onInput} />
+      <Input defaultValue={props.defaultText} type={props.hidden ? 'password' : undefined} onInput={props.onInput} />
     </div>
   );
 };

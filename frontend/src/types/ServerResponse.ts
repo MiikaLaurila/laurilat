@@ -1,3 +1,4 @@
+import { EditablePost, isEditablePost } from './EditablePost';
 import { User, isUser } from './User';
 
 export interface ServerResponse {
@@ -26,6 +27,10 @@ export interface ServerErrorResponse {
 
 export interface UserResponse extends ServerResponse {
   data: User;
+}
+
+export interface EditablePostResponse extends ServerResponse {
+  data: EditablePost;
 }
 
 export const isServerResponseError = (error: unknown): error is ServerResponseError => {
@@ -59,6 +64,13 @@ export const isServerErrorResponse = (response: unknown): response is ServerErro
 export const isUserResponse = (response: unknown): response is UserResponse => {
   if (isServerDataResponse(response)) {
     return isUser(response.data);
+  }
+  return false;
+};
+
+export const isEditablePostResponse = (response: unknown): response is EditablePostResponse => {
+  if (isServerDataResponse(response)) {
+    return isEditablePost(response.data);
   }
   return false;
 };

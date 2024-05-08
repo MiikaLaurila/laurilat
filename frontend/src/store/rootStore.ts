@@ -5,14 +5,19 @@ import { rtkQueryErrorLogger } from './errorLogger';
 import { userSlice } from './userSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { editableSlice } from './editableSlice';
+import { postApi } from './postApi';
+import { imageApi } from './imageApi';
 
 export const rootStore = configureStore({
   reducer: {
     [userApi.reducerPath]: userApi.reducer,
+    [postApi.reducerPath]: postApi.reducer,
+    [imageApi.reducerPath]: imageApi.reducer,
     userStore: userSlice.reducer,
     editableStore: editableSlice.reducer,
   },
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(userApi.middleware, rtkQueryErrorLogger),
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(userApi.middleware, postApi.middleware, imageApi.middleware, rtkQueryErrorLogger),
 });
 
 export type RootState = ReturnType<typeof rootStore.getState>;

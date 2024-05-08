@@ -1,4 +1,4 @@
-import { UserModel } from '../user/models/UserSchema';
+import { UserModel } from '../user/models/UserSchema.js';
 
 const migrations = [
   {

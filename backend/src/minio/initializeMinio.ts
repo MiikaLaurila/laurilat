@@ -1,9 +1,10 @@
 import { Client } from 'minio';
-import { environment } from '../utils/env';
+import { environment } from '../utils/env.js';
 
 let minioClient: Client | undefined = undefined;
 
 export const minioBuckets = {
+  profileImages: 'profile-images',
   images: 'images',
 } as const;
 
@@ -20,15 +21,17 @@ export const getMinioClient = () => {
   return minioClient;
 };
 
-export const initializeMinio = () => {
+export const initializeMinio = async () => {
   console.log('Initializing minio client');
-  ensureBuckets();
+  await ensureBuckets();
+  console.log('Minio initialized');
 };
 
-const ensureBuckets = () => {
+const ensureBuckets = async () => {
   const client = getMinioClient();
-  Object.values(minioBuckets).forEach((bucket) => {
-    const bucketExists = client.bucketExists(bucket);
+  Object.values(minioBuckets).forEach(async (bucket) => {
+    console.log('Check bucket exists:', bucket);
+    const bucketExists = await client.bucketExists(bucket);
     if (!bucketExists) {
       console.log('Creating missing bucket', bucket);
       client.makeBucket(bucket);

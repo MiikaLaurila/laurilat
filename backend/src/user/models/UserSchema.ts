@@ -25,22 +25,33 @@ export const DeleteUserValidator = object({
 
 export type DeleteUser = ReturnType<typeof DeleteUserValidator.validateSync>;
 
-export const UserSchema = new Schema({
-  username: { type: String, required: true, trim: true, unique: true },
-  name: { type: String, required: true, trim: true },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    validator:
-      // eslint-disable-next-line no-useless-escape
-      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-    trim: true,
+export const UserSchema = new Schema(
+  {
+    username: { type: String, required: true, trim: true, unique: true },
+    name: { type: String, required: true, trim: true },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      validator:
+        // eslint-disable-next-line no-useless-escape
+        /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+      trim: true,
+    },
+    password: { type: String, required: true },
+    admin: { type: Boolean, required: true },
+    profileImage: { type: String, required: true },
   },
-  password: { type: String, required: true },
-  admin: { type: Boolean, required: true },
-  profileImage: { type: String, required: true },
-});
+  {
+    toObject: {
+      transform: (_, ret) => {
+        delete ret._id;
+        delete ret.password;
+        delete ret.__v;
+      },
+    },
+  }
+);
 
 Schema.Types.String.checkRequired((v) => v != null);
 
