@@ -3,20 +3,22 @@ import { PostType, EditablePost, EditableType, Editable, EditableImageMeta } fro
 
 export const getInitialPost = (type: PostType, author: string): EditablePost => {
   return {
+    title: getInitialEditable(EditableType.TITLE),
     content: [],
     author,
     created: Date.now(),
     updated: Date.now(),
     type,
     draft: true,
+    alias: '',
     id: '',
   };
 };
 
 export const getInitialEditable = (type: EditableType): Editable => {
   switch (type) {
-    case EditableType.HEADING:
-      return defaultEditable(type, 'This is heading type 1');
+    case EditableType.TITLE:
+      return defaultEditable(type, 'This is title');
     case EditableType.HEADING2:
       return defaultEditable(type, 'This is heading type 2');
     case EditableType.HEADING3:
@@ -28,7 +30,7 @@ export const getInitialEditable = (type: EditableType): Editable => {
     case EditableType.PARAGRAPH:
       return defaultEditable(type, 'This is a paragraph');
     default:
-      return defaultEditable(EditableType.HEADING, 'Check code... Fell through switch...');
+      return defaultEditable(EditableType.PARAGRAPH, 'Check code... Fell through switch...');
   }
 };
 

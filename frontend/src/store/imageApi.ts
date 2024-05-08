@@ -11,7 +11,7 @@ const imagePostResponseTransformer = (rawResult: unknown) => {
 export const imageApi = createApi({
   reducerPath: 'imageApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'api/v1/image',
+    baseUrl: '/api/v1/image',
     credentials: 'include',
     mode: 'cors',
   }),

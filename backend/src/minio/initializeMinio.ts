@@ -30,8 +30,8 @@ export const initializeMinio = async () => {
 const ensureBuckets = async () => {
   const client = getMinioClient();
   Object.values(minioBuckets).forEach(async (bucket) => {
-    console.log('Check bucket exists:', bucket);
     const bucketExists = await client.bucketExists(bucket);
+    console.log(`Check bucket ${bucket} exists:`, bucketExists);
     if (!bucketExists) {
       console.log('Creating missing bucket', bucket);
       client.makeBucket(bucket);

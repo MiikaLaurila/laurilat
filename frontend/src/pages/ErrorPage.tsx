@@ -8,7 +8,7 @@ export const ErrorPage: React.FC = () => {
       <DefaultSideBar />
       <MainContent>
         <div>
-          <p>Oops, this page does not exist!</p>
+          <p>Oops, some kind of error happened!</p>
           {isRouteErrorResponse(error) && (
             <p>
               <i>

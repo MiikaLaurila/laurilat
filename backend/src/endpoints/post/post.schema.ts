@@ -8,7 +8,7 @@ import rehypeStringify from 'rehype-stringify';
 import { unified } from 'unified';
 
 enum EditableType {
-  HEADING = 'heading',
+  TITLE = 'title',
   HEADING2 = 'heading2',
   HEADING3 = 'heading3',
   PARAGRAPH = 'paragraph',
@@ -45,10 +45,13 @@ export const EditableValidator = object({
 export type ValidEditable = ReturnType<typeof EditableValidator.validateSync>;
 
 export const NewEditablePostValidator = object({
+  title: EditableValidator.required(),
   content: array().of(EditableValidator).required(),
   author: string().required(),
   type: mixed<PostType>().oneOf(Object.values(PostType)).required(),
   draft: boolean().required().default(false),
+  alias: string().notRequired().default(''),
+  meta: object().notRequired(),
 });
 
 export type NewEditablePost = ReturnType<typeof NewEditablePostValidator.validateSync>;
@@ -73,6 +76,7 @@ export const EditableSchema = new Schema(
 
 export const EditablePostSchema = new Schema(
   {
+    title: EditableSchema,
     content: [EditableSchema],
     author: { type: Types.ObjectId, ref: 'User', required: true },
     created: { type: Number, required: true },
@@ -80,6 +84,8 @@ export const EditablePostSchema = new Schema(
     type: { type: String, enum: PostType, required: true },
     draft: { type: Boolean, required: true },
     id: { type: String, required: true },
+    alias: { type: String, required: false },
+    meta: { type: Object, required: false },
   },
   {
     toObject: {

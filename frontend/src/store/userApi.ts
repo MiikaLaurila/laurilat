@@ -12,7 +12,7 @@ const userResponseTransformer = (rawResult: unknown) => {
 export const userApi = createApi({
   reducerPath: 'userApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'api/v1/user',
+    baseUrl: '/api/v1/user',
     credentials: 'include',
     mode: 'cors',
   }),

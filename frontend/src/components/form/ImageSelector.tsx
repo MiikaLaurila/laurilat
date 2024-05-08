@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from './Button';
 import { FormContainer } from './FormContainer';
 import { ImageElement, ImageElementContainer } from '../common/ImageContainer';
@@ -25,17 +25,32 @@ export const ImageSelector: React.FC<Props> = (props: Props) => {
   const imageSelectionRef = useRef<HTMLInputElement>(null);
   const [hasImage, setHasImage] = useState(false);
   const [imageSelected, setImageSelected] = useState(false);
-  const [uploadImageTrigger] = useUploadImageMutation();
+  const [uploadImageTrigger, uploadImageResult] = useUploadImageMutation();
+  const { onImageUploaded: onPropsImageUploaded } = props;
 
   useEffect(() => {
-    if (imageRef.current) {
+    if (imageRef.current && !imageSelected) {
       imageRef.current.onload = () => {
         if (imageRef.current) {
           setHasImage(imageRef.current.width > 0 && imageRef.current.height > 0);
         }
       };
     }
-  }, [imageRef, props.imageName]);
+  }, [imageRef, props.imageName, imageSelected]);
+
+  useEffect(() => {
+    if (uploadImageResult.isSuccess) {
+      onPropsImageUploaded(uploadImageResult.data);
+      if (imageRef.current) {
+        imageRef.current.onload = () => {
+          if (imageRef.current) {
+            setImageSelected(false);
+            setHasImage(imageRef.current.width > 0 && imageRef.current.height > 0);
+          }
+        };
+      }
+    }
+  }, [uploadImageResult, onPropsImageUploaded, imageRef, setHasImage]);
 
   const onImageClick = (evt: React.MouseEvent<HTMLDivElement>) => {
     evt.stopPropagation();
@@ -61,14 +76,14 @@ export const ImageSelector: React.FC<Props> = (props: Props) => {
   const uploadImage = () => {
     if (imageSelectionRef.current?.files && imageSelectionRef.current.files.length === 1) {
       const file = imageSelectionRef.current.files[0];
-      uploadImageTrigger(file).then((res) => {
-        if ('data' in res) {
-          props.onImageUploaded(res.data);
-          setImageSelected(false);
-        } else {
-          console.error(res);
-        }
-      });
+      uploadImageTrigger(file);
+    }
+  };
+
+  const onImageSizeInput = (evt: React.FormEvent<HTMLInputElement>) => {
+    const parsedNumber = parseFloat(evt.currentTarget.value);
+    if (!isNaN(parsedNumber)) {
+      props.onImageSizeChanged(parsedNumber / 10);
     }
   };
 
@@ -80,8 +95,13 @@ export const ImageSelector: React.FC<Props> = (props: Props) => {
         size={props.imageMeta.size}
         clickable={true}
       >
-        {props.imageName && !imageSelected && (
-          <ImageElement size={props.imageMeta.size} ref={imageRef} src={`/api/v1/image/${props.imageName}`} />
+        {props.imageName && (
+          <ImageElement
+            hidden={imageSelected}
+            size={props.imageMeta.size}
+            ref={imageRef}
+            src={`/api/v1/image/${props.imageName}`}
+          />
         )}
         {imageSelected && <ImageElement size={props.imageMeta.size} ref={previewImageRef} />}
         {!props.imageName && !imageSelected && <SelectImage>Click to select image</SelectImage>}
@@ -91,12 +111,7 @@ export const ImageSelector: React.FC<Props> = (props: Props) => {
         <TextInput
           title="Image size (px)"
           defaultText={(props.imageMeta.size * 10).toString()}
-          onInput={(evt) => {
-            const parsedNumber = parseFloat(evt.currentTarget.value);
-            if (!isNaN(parsedNumber)) {
-              props.onImageSizeChanged(parsedNumber / 10);
-            }
-          }}
+          onInput={onImageSizeInput}
         />
         {imageSelected && (
           <Button width={15} onClick={uploadImage}>

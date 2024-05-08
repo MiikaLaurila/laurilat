@@ -1,10 +1,21 @@
-import { UserModel } from '../user/models/UserSchema.js';
+import { EditablePostModel } from '../endpoints/post/post.schema.js';
+import { UserModel } from '../endpoints/user/user.schema.js';
 
 const migrations = [
   {
     model: UserModel,
     addField: 'profileImage',
     defaultValue: '',
+  },
+  {
+    model: EditablePostModel,
+    addField: 'alias',
+    defaultValue: '',
+  },
+  {
+    model: EditablePostModel,
+    addField: 'meta',
+    defaultValue: {},
   },
 ] as const;
 

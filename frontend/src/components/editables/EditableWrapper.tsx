@@ -10,6 +10,7 @@ import { Button } from '../form/Button';
 import {
   deleteEditableFromPost,
   modifyEditableOfPost,
+  modifyTitleOfPost,
   moveEditableOfPost,
   setHiglightedEditable,
 } from '../../store/editableSlice';
@@ -67,7 +68,11 @@ export const EditableWrapper: React.FC<Props> = (props: Props) => {
           if (meta) {
             newEditable.meta = meta;
           }
-          dispatch(modifyEditableOfPost(newEditable));
+          if (props.editable.type === EditableType.TITLE) {
+            dispatch(modifyTitleOfPost(newEditable));
+          } else {
+            dispatch(modifyEditableOfPost(newEditable));
+          }
         });
     }, debounceTime);
   };
@@ -80,7 +85,7 @@ export const EditableWrapper: React.FC<Props> = (props: Props) => {
     };
 
     switch (props.editable.type) {
-      case EditableType.HEADING:
+      case EditableType.TITLE:
         return <EditableHeading {...defaultProps} type={1} />;
       case EditableType.HEADING2:
         return <EditableHeading {...defaultProps} type={2} />;
@@ -101,39 +106,39 @@ export const EditableWrapper: React.FC<Props> = (props: Props) => {
     }
   };
 
+  const onFinishEditingClick = () => {
+    dispatch(setHiglightedEditable(undefined));
+  };
+
+  const onDeleteClick = () => {
+    dispatch(deleteEditableFromPost(props.editable.id));
+  };
+
+  const onMoveUpClick = () => {
+    dispatch(moveEditableOfPost({ editable: props.editable, direction: 'up' }));
+  };
+
+  const onMoveDownClick = () => {
+    dispatch(moveEditableOfPost({ editable: props.editable, direction: 'down' }));
+  };
+
   const getEditableControls = () => {
     return (
       <EditableControls>
-        <Button
-          onClick={() => {
-            dispatch(setHiglightedEditable(undefined));
-          }}
-        >
-          Apply
-        </Button>
-        <Button
-          onClick={() => {
-            dispatch(deleteEditableFromPost(props.editable.id));
-          }}
-        >
-          Delete
-        </Button>
-        <Button
-          onClick={() => {
-            dispatch(moveEditableOfPost({ editable: props.editable, direction: 'up' }));
-          }}
-        >
-          Move Up
-        </Button>
-        <Button
-          onClick={() => {
-            dispatch(moveEditableOfPost({ editable: props.editable, direction: 'down' }));
-          }}
-        >
-          Move Down
-        </Button>
+        <Button onClick={onFinishEditingClick}>Finish editing</Button>
+        {props.editable.type !== EditableType.TITLE && (
+          <>
+            <Button onClick={onDeleteClick}>Delete</Button>
+            <Button onClick={onMoveUpClick}>Move Up</Button>
+            <Button onClick={onMoveDownClick}>Move Down</Button>
+          </>
+        )}
       </EditableControls>
     );
+  };
+
+  const onUnHighlightedEditableClick = () => {
+    dispatch(setHiglightedEditable(props.editable));
   };
 
   const getEditModeEditables = () => {
@@ -145,15 +150,7 @@ export const EditableWrapper: React.FC<Props> = (props: Props) => {
         </HighlightedEditable>
       );
     } else {
-      return (
-        <UnHighlightedEditable
-          onClick={() => {
-            dispatch(setHiglightedEditable(props.editable));
-          }}
-        >
-          {getEditable()}
-        </UnHighlightedEditable>
-      );
+      return <UnHighlightedEditable onClick={onUnHighlightedEditableClick}>{getEditable()}</UnHighlightedEditable>;
     }
   };
 

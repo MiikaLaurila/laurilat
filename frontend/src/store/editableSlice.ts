@@ -1,6 +1,7 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
-import { Editable, EditablePost, ModifiedEditablePost } from '../types/EditablePost';
+import { Editable, EditablePost, ModifiedEditablePost, PostType } from '../types/EditablePost';
 import { postApi } from './postApi';
+import { getInitialPost } from '../library/editables';
 
 interface EditableState {
   editing: boolean;
@@ -18,6 +19,13 @@ const swapElements = <T>(array: T[], idx1: number, idx2: number) => {
   array[idx2] = temp;
 };
 
+const intialEditState = {
+  editing: false,
+  highlightedEditable: undefined,
+  editedPost: undefined,
+  addingItem: false,
+} as const;
+
 export const editableSlice = createSlice({
   name: 'editable',
   initialState,
@@ -25,10 +33,17 @@ export const editableSlice = createSlice({
     setEditing: (state, action: PayloadAction<boolean>) => {
       return {
         ...state,
+        ...intialEditState,
         editing: action.payload,
-        highlightedEditable: undefined,
-        editedPost: undefined,
-        addingItem: false,
+      };
+    },
+    initializeEditingNewPage: (state, action: PayloadAction<{ type: PostType; author: string }>) => {
+      return {
+        ...state,
+        ...intialEditState,
+        editing: true,
+        editedPost: getInitialPost(action.payload.type, action.payload.author),
+        currentPost: undefined,
       };
     },
     setAddingItem: (state, action: PayloadAction<boolean>) => {
@@ -40,6 +55,7 @@ export const editableSlice = createSlice({
     setCurrentPost: (state, action: PayloadAction<EditablePost>) => {
       return {
         ...state,
+        ...intialEditState,
         currentPost: action.payload,
       };
     },
@@ -53,6 +69,26 @@ export const editableSlice = createSlice({
       return {
         ...state,
         highlightedEditable: action.payload,
+      };
+    },
+    modifyTitleOfPost: (state, action: PayloadAction<Editable>) => {
+      if (!state.editedPost) return state;
+      return {
+        ...state,
+        editedPost: {
+          ...state.editedPost,
+          title: action.payload,
+        },
+      };
+    },
+    modifyAliasOfPost: (state, action: PayloadAction<string>) => {
+      if (!state.editedPost) return state;
+      return {
+        ...state,
+        editedPost: {
+          ...state.editedPost,
+          alias: action.payload,
+        },
       };
     },
     addEditableToPost: (state, action: PayloadAction<Editable>) => {
@@ -115,36 +151,18 @@ export const editableSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addMatcher(postApi.endpoints.getPost.matchFulfilled, (state, query) => {
+      .addMatcher(postApi.endpoints.createPost.matchFulfilled, (state) => {
         return {
           ...state,
-          currentPost: query.payload,
+          ...intialEditState,
+          currentPost: undefined,
         };
       })
-      .addMatcher(postApi.endpoints.getHomePost.matchFulfilled, (state, query) => {
+      .addMatcher(postApi.endpoints.modifyPost.matchFulfilled, (state) => {
         return {
           ...state,
-          currentPost: query.payload,
-        };
-      })
-      .addMatcher(postApi.endpoints.createPost.matchFulfilled, (state, query) => {
-        return {
-          ...state,
-          currentPost: query.payload,
-          highlightedEditable: undefined,
-          editedPost: undefined,
-          addingItem: false,
-          editing: false,
-        };
-      })
-      .addMatcher(postApi.endpoints.modifyPost.matchFulfilled, (state, query) => {
-        return {
-          ...state,
-          currentPost: query.payload,
-          highlightedEditable: undefined,
-          editedPost: undefined,
-          addingItem: false,
-          editing: false,
+          ...intialEditState,
+          currentPost: undefined,
         };
       });
   },
@@ -152,10 +170,13 @@ export const editableSlice = createSlice({
 
 export const {
   setEditing,
+  initializeEditingNewPage,
   setAddingItem,
   setCurrentPost,
   setEditedPost,
   setHiglightedEditable,
+  modifyTitleOfPost,
+  modifyAliasOfPost,
   addEditableToPost,
   modifyEditableOfPost,
   deleteEditableFromPost,

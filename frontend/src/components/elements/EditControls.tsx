@@ -4,17 +4,20 @@ import { Button } from '../form/Button';
 import { cssColors, cssWidths } from '../../style/values';
 import {
   addEditableToPost,
+  modifyAliasOfPost,
   setAddingItem,
   setEditedPost,
   setEditing,
   setHiglightedEditable,
 } from '../../store/editableSlice';
-import { EditableType, PostType } from '../../types/EditablePost';
+import { EditableType, ModifiedEditablePost, PostType } from '../../types/EditablePost';
 import { getInitialEditable, getInitialPost } from '../../library/editables';
 import deepEqual from 'deep-equal';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { ConfirmationModal } from '../common/ConfirmationModal';
 import { useCreatePostMutation, useModifyPostMutation } from '../../store/postApi';
+import { useNavigate } from 'react-router-dom';
+import { TextInput } from '../form/TextInput';
 
 interface Props {
   postType: PostType;
@@ -43,7 +46,7 @@ const EditControlsEnabled = styled('div')({
   alignItems: 'center',
 });
 
-const EditControlsButtonCluster = styled('div')({
+const EditControlsCluster = styled('div')({
   display: 'flex',
   gap: '0.5rem',
   height: '5rem',
@@ -60,22 +63,21 @@ export const EditControls: React.FC<Props> = (props: Props) => {
   const [saveEditDialogOpen, setSaveEditDialogOpen] = useState(false);
   const [createPostTrigger] = useCreatePostMutation();
   const [modifyPostTrigger] = useModifyPostMutation();
+  const navigator = useNavigate();
+
+  const onEditPostButtonClick = () => {
+    dispatch(setEditing(!editState.editing));
+    if (!editState.currentPost && userInfo) {
+      dispatch(setEditedPost(getInitialPost(props.postType, userInfo.username)));
+    } else if (editState.currentPost) {
+      dispatch(setEditedPost(structuredClone(editState.currentPost)));
+    }
+  };
 
   const getNonEditControls = () => {
     return (
       <EditControlsDisabled>
-        <Button
-          onClick={() => {
-            dispatch(setEditing(!editState.editing));
-            if (!editState.currentPost) {
-              dispatch(setEditedPost(getInitialPost(props.postType, userInfo?.username ?? '')));
-            } else {
-              dispatch(setEditedPost(structuredClone(editState.currentPost)));
-            }
-          }}
-        >
-          {'Edit Post'}
-        </Button>
+        <Button onClick={onEditPostButtonClick}>{'Edit Post'}</Button>
       </EditControlsDisabled>
     );
   };
@@ -88,9 +90,10 @@ export const EditControls: React.FC<Props> = (props: Props) => {
 
   const getAddContentControls = () => {
     return (
-      <EditControlsButtonCluster>
+      <EditControlsCluster>
         {Object.values(EditableType)
           .filter((v) => isNaN(Number(v)))
+          .filter((editableType) => editableType !== EditableType.TITLE)
           .map((editableType) => {
             return (
               <Button
@@ -103,7 +106,19 @@ export const EditControls: React.FC<Props> = (props: Props) => {
               </Button>
             );
           })}
-      </EditControlsButtonCluster>
+      </EditControlsCluster>
+    );
+  };
+
+  const onInputAliasField = (evt: React.FormEvent<HTMLInputElement>) => {
+    dispatch(modifyAliasOfPost(evt.currentTarget.value.trim()));
+  };
+
+  const getEditAliasField = () => {
+    return (
+      <EditControlsCluster style={{ padding: '0.5rem 1rem 0rem 0rem' }}>
+        <TextInput title="post id alias" defaultText={editState.editedPost?.alias} onInput={onInputAliasField} />
+      </EditControlsCluster>
     );
   };
 
@@ -115,70 +130,93 @@ export const EditControls: React.FC<Props> = (props: Props) => {
       return false;
     }
     if (editState.editedPost) {
-      return !deepEqual(editState.currentPost.content, editState.editedPost.content);
+      return (
+        !deepEqual(editState.currentPost.content, editState.editedPost.content) ||
+        !deepEqual(editState.currentPost.title, editState.editedPost.title) ||
+        editState.currentPost.alias !== editState.editedPost.alias
+      );
     }
   };
 
-  const saveCurrentPost = () => {
+  const createBaseSaveData = (editedPost: ModifiedEditablePost) => {
+    return {
+      title: editedPost.title,
+      content: editedPost.content,
+      author: editedPost.author,
+      type: editedPost.type,
+      alias: editedPost.alias,
+      draft: false,
+    };
+  };
+
+  const onConfirmSavePost = () => {
     if (editState.editedPost) {
-      if (editState.editedPost.id) {
+      const currentType = editState.editedPost.type;
+      const currentId = editState.editedPost.id;
+      const currentAlias = editState.editedPost.alias;
+      if (currentId) {
         modifyPostTrigger({
-          content: editState.editedPost.content,
-          author: editState.editedPost.author,
-          type: editState.editedPost.type,
-          draft: false,
-          id: editState.editedPost.id,
+          ...createBaseSaveData(editState.editedPost),
+          id: currentId,
         }).then(() => {
           setSaveEditDialogOpen(false);
+          if (currentType !== PostType.HOME) {
+            navigator(`/${currentType}/${currentAlias ? currentAlias : currentId}`);
+          }
         });
       } else {
         createPostTrigger({
-          content: editState.editedPost.content,
-          author: editState.editedPost.author,
-          type: editState.editedPost.type,
-          draft: false,
-        }).then(() => {
+          ...createBaseSaveData(editState.editedPost),
+          title: editState.editedPost.title,
+        }).then((response) => {
           setSaveEditDialogOpen(false);
+          if ('data' in response) {
+            if (currentType !== PostType.HOME) {
+              navigator(`/${currentType}/${response.data.alias ? response.data.alias : response.data.id}`);
+            }
+          }
         });
       }
     }
+  };
+
+  const onStopEditingClick = () => {
+    if (isCurrentPostEdited()) {
+      setStopEditDialogOpen(true);
+    } else {
+      dispatch(setEditing(false));
+    }
+  };
+
+  const onSaveEditClick = () => {
+    if (!isCurrentPostEdited()) {
+      return;
+    } else {
+      setSaveEditDialogOpen(true);
+    }
+  };
+
+  const onAddItemClick = () => {
+    dispatch(setAddingItem(!editState.addingItem));
+  };
+
+  const onConfirmStopEdit = () => {
+    setStopEditDialogOpen(false);
+    dispatch(setEditing(false));
   };
 
   const getEditControls = () => {
     return (
       <>
         <EditControlsEnabled>
-          <EditControlsButtonCluster>
-            <Button
-              onClick={() => {
-                if (isCurrentPostEdited()) {
-                  setStopEditDialogOpen(true);
-                } else {
-                  dispatch(setEditing(!editState.editing));
-                }
-              }}
-            >
-              Stop Editing
-            </Button>
-            <Button
-              onClick={() => {
-                if (!isCurrentPostEdited()) {
-                  return;
-                } else {
-                  setSaveEditDialogOpen(true);
-                }
-              }}
-            >
+          <EditControlsCluster>
+            <Button onClick={onStopEditingClick}>Stop Editing</Button>
+            <Button onClick={onSaveEditClick}>
               {editState.editedPost?.id ? 'Save modifications' : 'Create new post'}
             </Button>
-            <Button
-              onClick={() => {
-                dispatch(setAddingItem(!editState.addingItem));
-              }}
-            >
-              Add Content
-            </Button>
-          </EditControlsButtonCluster>
+            <Button onClick={onAddItemClick}>Add Content</Button>
+          </EditControlsCluster>
+          {getEditAliasField()}
           {editState.addingItem && getAddContentControls()}
         </EditControlsEnabled>
         <ConfirmationModal
@@ -187,10 +225,7 @@ export const EditControls: React.FC<Props> = (props: Props) => {
           onCancel={() => {
             setStopEditDialogOpen(false);
           }}
-          onConfirm={() => {
-            setStopEditDialogOpen(false);
-            dispatch(setEditing(!editState.editing));
-          }}
+          onConfirm={onConfirmStopEdit}
           open={stopEditDialogOpen}
         />
         <ConfirmationModal
@@ -199,7 +234,7 @@ export const EditControls: React.FC<Props> = (props: Props) => {
           onCancel={() => {
             setSaveEditDialogOpen(false);
           }}
-          onConfirm={saveCurrentPost}
+          onConfirm={onConfirmSavePost}
           open={saveEditDialogOpen}
         />
       </>

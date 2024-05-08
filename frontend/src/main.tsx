@@ -11,6 +11,9 @@ import { Provider } from 'react-redux';
 import { rootStore } from './store/rootStore';
 import { PeoplePage } from './pages/PeoplePage';
 import { UserPage } from './pages/UserPage';
+import { NewPeoplePage } from './pages/NewPeoplePage';
+import { PostPage } from './pages/PostPage';
+import { PostType } from './types/EditablePost';
 
 const router = createBrowserRouter([
   {
@@ -32,6 +35,14 @@ const router = createBrowserRouter([
           {
             path: '/people',
             element: <PeoplePage />,
+          },
+          {
+            path: '/people/new',
+            element: <NewPeoplePage />,
+          },
+          {
+            path: '/people/:postId',
+            element: <PostPage postType={PostType.PEOPLE} />,
           },
           {
             path: '/user',

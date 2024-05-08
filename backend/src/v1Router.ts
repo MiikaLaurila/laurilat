@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { userRouter } from './user/router/userRouter.js';
-import { postRouter } from './user/router/postRouter.js';
-import { imageRouter } from './user/router/imageRouter.js';
+import { userRouter } from './endpoints/user/user.router.js';
+import { postRouter } from './endpoints/post/post.router.js';
+import { imageRouter } from './endpoints/image/image.router.js';
 
 export const v1Router = Router();
 
