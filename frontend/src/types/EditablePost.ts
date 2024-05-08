@@ -79,6 +79,18 @@ export const isEditablePost = (data: unknown): data is EditablePost => {
   return false;
 };
 
+export const isFoodEditablePost = (data: unknown): data is FoodEditablePost => {
+  if (isEditablePost(data)) {
+    const hasMeta = ['meta'].every((k) => Object.prototype.hasOwnProperty.call(data, k));
+    if (hasMeta) {
+      return ['city', 'coordinates'].every((k) =>
+        Object.prototype.hasOwnProperty.call((data as { meta: Record<string, unknown> }).meta, k)
+      );
+    }
+  }
+  return false;
+};
+
 export const isEditablePostDescriptions = (data: unknown): data is EditablePostDescription[] => {
   if (data) {
     // data has posts
