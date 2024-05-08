@@ -1,7 +1,5 @@
-import styled from '@emotion/styled';
 import { useAppDispatch, useAppSelector } from '../../store/rootStore';
 import { Button } from '../form/Button';
-import { cssColors, cssWidths } from '../../style/values';
 import {
   addEditableToPost,
   modifyAliasOfPost,
@@ -18,44 +16,14 @@ import { ConfirmationModal } from '../common/ConfirmationModal';
 import { useCreatePostMutation, useModifyPostMutation } from '../../store/postApi';
 import { useNavigate } from 'react-router-dom';
 import { TextInput } from '../form/TextInput';
+import { EditControlsDisabled, EditControlsCluster, EditControlsEnabled } from '../form/EditControls';
 
 interface Props {
   postType: PostType;
+  extraEditControls?: React.ReactNode;
 }
 
-const EditControlsDisabled = styled('div')({
-  display: 'flex',
-  gap: '1rem',
-  position: 'fixed',
-  bottom: '0rem',
-  left: '50%',
-  transform: `translate(calc(-100% + calc(${cssWidths.innerBody / 2}rem - 8px)), -50%)`,
-});
-
-const EditControlsEnabled = styled('div')({
-  display: 'flex',
-  height: '5rem',
-  width: '100%',
-  backgroundColor: cssColors.menuHover,
-  borderTop: `1px solid ${cssColors.darkBorder}`,
-  gap: '1rem',
-  position: 'fixed',
-  bottom: '0rem',
-  left: 0,
-  padding: '0rem 2rem',
-  alignItems: 'center',
-});
-
-const EditControlsCluster = styled('div')({
-  display: 'flex',
-  gap: '0.5rem',
-  height: '5rem',
-  padding: '1.5rem 0rem',
-  paddingRight: '1rem',
-  borderRight: '1px solid black',
-});
-
-export const EditControls: React.FC<Props> = (props: Props) => {
+export const BasicEditControls: React.FC<Props> = (props: Props) => {
   const editState = useAppSelector((state) => state.editableStore);
   const userInfo = useAppSelector((state) => state.userStore.userInfo);
   const dispatch = useAppDispatch();

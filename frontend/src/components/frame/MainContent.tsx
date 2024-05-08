@@ -1,13 +1,19 @@
 import styled from '@emotion/styled';
 import { PropsWithChildren } from 'react';
+import { useAppSelector } from '../../store/rootStore';
 
-const MainContentElement = styled('main')({
+const MainContentElement = styled('main')<{ editPadding: boolean }>((props) => ({
   padding: '2rem',
   fontFamily: 'Roboto',
   width: '100%',
-  paddingBottom: '5rem',
-});
+  paddingBottom: props.editPadding ? '20rem' : '2rem',
+}));
 
 export const MainContent: React.FC<PropsWithChildren> = (props: PropsWithChildren) => {
-  return <MainContentElement id="content">{props.children}</MainContentElement>;
+  const isEditing = useAppSelector((state) => state.editableStore.editing);
+  return (
+    <MainContentElement id="content" editPadding={isEditing}>
+      {props.children}
+    </MainContentElement>
+  );
 };

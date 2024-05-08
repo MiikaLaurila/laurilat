@@ -82,6 +82,15 @@ export const postApi = createApi({
       transformResponse: editablePostDescriptionResponseTransformer,
       providesTags: (result) => (result ? result.map((post) => ({ type: 'post', id: post.id })) : ['post']),
     }),
+
+    getLatestPosts: builder.query<EditablePostDescription[], void>({
+      query: () => ({
+        url: `/list/latest`,
+        method: 'GET',
+      }),
+      transformResponse: editablePostDescriptionResponseTransformer,
+      providesTags: (result) => (result ? result.map((post) => ({ type: 'post', id: post.id })) : ['post']),
+    }),
   }),
 });
 
@@ -94,4 +103,6 @@ export const {
   useLazyGetHomePostQuery,
   useGetPostTypesQuery,
   useLazyGetPostTypesQuery,
+  useGetLatestPostsQuery,
+  useLazyGetLatestPostsQuery,
 } = postApi;

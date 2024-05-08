@@ -1,10 +1,12 @@
+import React from 'react';
 import { useAppSelector } from '../../store/rootStore';
 import { ModifiedEditablePost, PostType } from '../../types/EditablePost';
 import { EditableWrapper } from '../editables/EditableWrapper';
-import { EditControls } from './EditControls';
+import { BasicEditControls } from './BasicEditControls';
 
 interface Props {
   postType: PostType;
+  extraEditControls?: React.ReactNode;
 }
 
 export const Post: React.FC<Props> = (props: Props) => {
@@ -40,7 +42,7 @@ export const Post: React.FC<Props> = (props: Props) => {
 
   return (
     <>
-      {canEdit() && <EditControls postType={props.postType} />}
+      {canEdit() && <BasicEditControls postType={props.postType} extraEditControls={props.extraEditControls} />}
       {getPost()}
     </>
   );
